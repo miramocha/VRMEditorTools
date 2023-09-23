@@ -62,7 +62,7 @@ class VRMParser {
 
         // Magic MUST be equal to equal 0x46546C67. It is ASCII string glTF and can be used to identify data as Binary glTF.
         if (VRMParser.header.magic != VRMParser.GLB_HEADER_MAGIC) {
-            console.warn('file is not GLB file');
+            console.warn('File is not GLB file');
             return;
         }
 
@@ -71,13 +71,13 @@ class VRMParser {
         console.log('length', VRMParser.header.length)
 
         // Chunks 0 を jsonとしてパース
-        VRMParser.jsonChunk = VRMParser.parseGlbJsonChunk(src, VRMParser.CHUNK_HEADER_SIZE)
+        VRMParser.jsonChunk = VRMParser.parseJsonChunk(src, VRMParser.CHUNK_HEADER_SIZE)
         if (typeof VRMParser.jsonChunk == 'undefined') {
             return
         }
         console.log('jsonChunk', VRMParser.jsonChunk)
         VRMParser.json = VRMParser.jsonChunk.json
-        console.log(VRMParser.json)
+        console.log('EXTENSIONS', VRMParser.json.extensions)
 
         // Chunks 1 を 取得
         const binaryChunkOffset = VRMParser.CHUNK_HEADER_SIZE
@@ -146,12 +146,10 @@ class VRMParser {
     }
 
     // JSON 部分を取り出す 
-    private static parseGlbJsonChunk = (src: DataView, offset: number) => {
-        console.log('parseGlbJsonChunk', src, offset)
+    private static parseJsonChunk = (src: DataView, offset: number) => {
+        console.log('parseJsonChunk', src, offset)
         const chunk = VRMParser.parseChunk(VRMParser.CHUNK_TYPE_JSON, src, offset)
 
-        // Client implementations MUST ignore chunks with unknown types to enable glTF extensions 
-        // to reference additional chunks with new types following the first two chunks.
         if (typeof chunk == 'undefined') {
             return
         }
@@ -183,6 +181,7 @@ class VRMParser {
     private static loadImages = (chunkData: ArrayBuffer, json: any): Promise<any[]> => {
         // console.log('loadImages', json.images)
         // console.log('chunkData', chunkData)
+
         return new Promise((resolve, reject) => {
             const images: any[] = []
             if (json.images.length == 0) {
@@ -316,7 +315,11 @@ class VRMParser {
     // 一人称視点の視点のオフセット位置を取得
     // json.extensions.VRM.firstPerson
     public static getFirstPersonBone = (): { firstPerson: any } => {
-        const extVRM = VRMParser.json.extensions.VRM
+        let extVRM = VRMParser.json.extensions.VRM
+        if (extVRM) {
+            console.warn('NOT VRM 0, attempting to parse VRM1.0');
+            extVRM = VRMParser.json.extensions.VRMC_vrm
+        }
         console.log('extVRM', extVRM)
         console.log('firstPerson', extVRM.firstPerson)
         return extVRM.firstPerson

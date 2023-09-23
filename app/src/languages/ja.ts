@@ -19,4 +19,5 @@ export default {
     tabShortVideoBtnBackgroundImage: "アップロード",
     tabShortVideoBtnCreateVideo: "動画作成",
     tabMaterials: 'マテリアル',
+    tabShader: 'シェーダ' // GOOGLE TRANSLATE. PLEASE CHECK
 }

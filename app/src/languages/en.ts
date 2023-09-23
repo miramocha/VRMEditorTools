@@ -4,7 +4,7 @@ export default {
     btnExport: 'Output VRM files',
     exportImage: 'Download Image',
     importImage: 'Upload Image',
-    tabImages: 'images',
+    tabImages: 'Images',
     tabFirstPerson: 'FirstPerson,Scale',
     titleFirstPerson: 'FirstPersonOffset',
     titleScale: 'Scale',
@@ -15,8 +15,9 @@ export default {
     placeholderHitRadius: 'Recommended setting is 0.1 - 0.2',
     tabShortVideo: 'Short Video',
     tabShortVideoLabelScene: 'Scene',
-    tabShortVideoLabelBackgroundImage: 'background image',
+    tabShortVideoLabelBackgroundImage: 'Background Image',
     tabShortVideoBtnBackgroundImage: 'Upload Image',
     tabShortVideoBtnCreateVideo: 'Create Video',
     tabMaterials: 'Materials',
+    tabShader: 'Shader'
 }

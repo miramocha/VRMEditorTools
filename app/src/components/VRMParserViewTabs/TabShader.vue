@@ -1,5 +1,5 @@
 <template>
-    <div class="tabContents tabMaterials" v-if="selectTabType == 'tab_materials'">
+    <div class="tabContents tabMaterials" v-if="selectTabType == 'tab_shader'">
       <table class="table">
         <thead>
           <tr>
@@ -59,7 +59,7 @@ import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 import VRMParser from '@/module/VRMParser'
 
 @Component
-export default class TabMaterials extends Vue {
+export default class TabShader extends Vue {
   @Prop() 
   drawVrm: (file: File) => void
 
