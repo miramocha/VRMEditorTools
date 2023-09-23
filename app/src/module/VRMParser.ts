@@ -91,19 +91,10 @@ class VRMParser {
         console.log('binaryChunk', VRMParser.binaryChunk)
 
         // テクスチャを取り出す images, bufferViews
-        VRMParser.loadImages(VRMParser.binaryChunk.chunkData, VRMParser.json)
-            .then(images => {
-                VRMParser.images = images
-                console.log('images', VRMParser.images)
+        VRMParser.images = VRMParser.loadImages(VRMParser.binaryChunk.chunkData, VRMParser.json)
+        console.log('images', VRMParser.images)
 
-                // コールバックする
-                VRMParser.callback(VRMParser.json, VRMParser.images)
-            })
-            .catch(e => {
-                console.error('e', e)
-            })
-
-        
+        VRMParser.callback(VRMParser.json, VRMParser.images)
     }
 
     private static toHexStr = (value: number) => {
@@ -178,35 +169,27 @@ class VRMParser {
     }
 
     // テクスチャを取り出す images, bufferViews
-    private static loadImages = (chunkData: ArrayBuffer, json: any): Promise<any[]> => {
+    private static loadImages = (chunkData: ArrayBuffer, json: any): any[] => {
         // console.log('loadImages', json.images)
         // console.log('chunkData', chunkData)
 
-        return new Promise((resolve, reject) => {
-            const images: any[] = []
-            if (json.images.length == 0) {
-                resolve(images)
-                return
-            }
-            json.images
-                .forEach((v: any) => {
-                    const bufferView = json.bufferViews[v.bufferView]
-                    // new Uint8Array はうまく動作しない
-                    // const buf = new Uint8Array(chunkData, bufferView.byteOffset, bufferView.byteLength)
-                    const buf = chunkData.slice(bufferView.byteOffset, bufferView.byteOffset + bufferView.byteLength)
-                    const blob = new Blob([buf], { type: v.mimeType })
+        if (json.images.length === 0) {
+            return [];
+        }
 
-                    const img = URL.createObjectURL(blob)
-                    images.push({
-                        index: v.bufferView,
-                        name: v.name,
-                        mimeType: v.mimeType,
-                        src: img,
-                        size: blob.size
-                    })
-                })
-            resolve(images)
-        })
+        return json.images.map((image: any) => {
+            const bufferView = json.bufferViews[image.bufferView]
+            const buf = chunkData.slice(bufferView.byteOffset, bufferView.byteOffset + bufferView.byteLength)
+            const blob = new Blob([buf], { type: image.mimeType })
+
+            return {
+                index: image.bufferView,
+                name: image.name,
+                mimeType: image.mimeType,
+                src: URL.createObjectURL(blob),
+                size: blob.size
+            }
+        });
     }
 
     // json(jsonChunk), binaryChunk を再構築する
@@ -314,12 +297,8 @@ class VRMParser {
 
     // 一人称視点の視点のオフセット位置を取得
     // json.extensions.VRM.firstPerson
-    public static getFirstPersonBone = (): { firstPerson: any } => {
-        let extVRM = VRMParser.json.extensions.VRM
-        if (extVRM) {
-            console.warn('NOT VRM 0, attempting to parse VRM1.0');
-            extVRM = VRMParser.json.extensions.VRMC_vrm
-        }
+    public static getFirstPersonBone = (): {firstPerson: any} => {
+        const extVRM = VRMParser.getVRMExtensionJson()
         console.log('extVRM', extVRM)
         console.log('firstPerson', extVRM.firstPerson)
         return extVRM.firstPerson
@@ -328,7 +307,7 @@ class VRMParser {
     // 一人称視点の視点のオフセット位置を設定
     public static setFirstPersonBoneOffset = (position: { x: number, y: number, z: number }): Promise<void> => {
         return new Promise((resolve, reject) => {
-            const extVRM = VRMParser.json.extensions.VRM
+            const extVRM = VRMParser.getVRMExtensionJson()
             extVRM.firstPerson.firstPersonBoneOffset.x = position.x
             extVRM.firstPerson.firstPersonBoneOffset.y = position.y
             extVRM.firstPerson.firstPersonBoneOffset.z = position.z
@@ -418,17 +397,17 @@ class VRMParser {
     }
 
     // スプリングボーン グループ を取得する
-    public static getSecondaryAnimationBoneGroups = (): { boneGroups: any } => {
-        const extVRM = VRMParser.json.extensions.VRM
+    public static getSecondaryAnimationBoneGroups = (): {boneGroups: any} => {
+        const extVRM = VRMParser.getVRMExtensionJson()
         console.log('extVRM', extVRM)
         console.log('secondaryAnimation', extVRM.secondaryAnimation)
-        return extVRM.secondaryAnimation.boneGroups
+        return extVRM.secondaryAnimation?.boneGroups
     }
 
     // スプリングボーンを更新
     public static setSecondaryAnimationBoneGroups = (boneGroups: any): Promise<void> => {
         return new Promise((resolve, reject) => {
-            const extVRM = VRMParser.json.extensions.VRM
+            const extVRM = VRMParser.getVRMExtensionJson()
             extVRM.secondaryAnimation.boneGroups = boneGroups
 
             return VRMParser.chunkRebuilding()
@@ -467,6 +446,16 @@ class VRMParser {
                     console.error('error', e)
                 })
         })
+    }
+
+    private static getVRMExtensionJson() {
+        let extVRM = VRMParser.json.extensions.VRM
+        if (!extVRM) {
+            console.warn('NOT VRM 0.0, attempting to parse VRM 1.0');
+            extVRM = VRMParser.json.extensions.VRMC_vrm
+        }
+
+        return extVRM
     }
 }
 
