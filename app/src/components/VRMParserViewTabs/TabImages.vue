@@ -12,7 +12,7 @@
         <tbody>
           <tr v-for="img,i in vrmImages" :key="i">
             <td class="tableDetail">
-              <p>{{img.name}}</p>
+              <p>[INDEX:{{i}}]{{img.name}}</p>
               <table>
                 <tbody>
                   <tr>

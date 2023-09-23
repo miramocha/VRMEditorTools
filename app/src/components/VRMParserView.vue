@@ -75,8 +75,7 @@ export default class VRMParserView extends Vue {
 
       //VRM パース
       VRMParser.parse(selectVrmFile, (json: any, images: any[]) => {
-        this.vrmImages.splice(0, this.vrmImages.length)
-        this.vrmImages.push(...images)
+        this.vrmImages = [...images]
         console.log('vrmImages', this.vrmImages)
 
         // 一人称視点の位置を取得

@@ -34,9 +34,22 @@
                         <p><button @click="exportImage(img.normalTexture.img)">{{$t('exportImage')}}</button></p>
                         <p><button @click="importImage(img.normalTexture.img)">{{$t('importImage')}}</button></p>
                     </td>
-                  </tr>                  
+                  </tr>
+                  <tr v-if="img.emissiveTexture.img">
+                    <td class="title">emissive</td>
+                    <td>
+                      <img class="src_thumbnail" :src="img.emissiveTexture.img.src" :alt="img.emissiveTexture.img.name"/>
+                    </td>
+                    <td>
+                        <p><button @click="exportImage(img.emissiveTexture.img)">{{$t('exportImage')}}</button></p>
+                        <p><button @click="importImage(img.emissiveTexture.img)">{{$t('importImage')}}</button></p>
+                    </td>
+                  </tr>   
                 </tbody>
               </table>    
+            </td>
+            <td>
+              <pre>{{img.materialJson}}</pre>
             </td>
           </tr>
         </tbody>        
@@ -83,7 +96,11 @@ export default class TabMaterials extends Vue {
         },
         baseColorTexture : {
           img: (elem.pbrMetallicRoughness.baseColorTexture) ? images[elem.pbrMetallicRoughness.baseColorTexture.index] : null
-        }
+        },
+        emissiveTexture: {
+          img: (elem.emissiveTexture) ? images[elem.emissiveTexture.index] : null
+        },
+        materialJson: JSON.stringify(elem)
       })
     })
 
@@ -126,8 +143,7 @@ export default class TabMaterials extends Vue {
 
                   //画像一覧の更新
                   VRMParser.parse(file, (json: any, images: any[]) => {
-                    this.vrmImages.splice(0, this.vrmImages.length)
-                    this.vrmImages.push(...images)
+                    this.vrmImages = [...images]
                     console.log('vrmImages', this.vrmImages)
                   })
                   
